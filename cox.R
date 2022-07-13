@@ -48,14 +48,14 @@ ggsurvplot(fit, conf.int = TRUE, legend.labs=c("Sex=1", "Sex=2"), data=lung,
 
 #Format data to DMatrix
 data <- as.matrix(lung)
-status <- as.matrix(lung$status)
-Dmat <- xgb.DMatrix(data = data[,4:10], label = status)
+time <- as.matrix(lung$time)
+Dmat <- xgb.DMatrix(data = data[,4:10], label = time)
 
 #Tune hyperparameters
 set.seed(123)
 xgb.fit1 <- xgb.cv(
   data = Dmat,
-  label = status,
+  label = time,
   nrounds = 1000,
   nfold = 5,
   objective = "survival:cox", 
