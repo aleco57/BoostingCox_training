@@ -5,6 +5,11 @@
 # Load packages
 library("survival")
 library("survminer")
+library(xgboost)
+library(caTools)
+library(dplyr)
+library(caret)
+library(shapr)
 
 #Fit our cox model adding sex as a covariate
 res.cox <- coxph(Surv(time, status) ~ sex, data = lung)
@@ -40,4 +45,33 @@ ggsurvplot(fit, conf.int = TRUE, legend.labs=c("Sex=1", "Sex=2"), data=lung,
 ###########
 #Boosting
 ###########
+
+#Format data to DMatrix
+data <- as.matrix(lung)
+status <- as.matrix(lung$status)
+Dmat <- xgb.DMatrix(data = data[,4:10], label = status)
+
+#Tune hyperparameters
+set.seed(123)
+xgb.fit1 <- xgb.cv(
+  data = Dmat,
+  label = status,
+  nrounds = 1000,
+  nfold = 5,
+  objective = "survival:cox", 
+  verbose = 0               
+)
+
+
+
+model <- xgboost(data = Dmat, 
+                 max.depth = 2, 
+                 eta = 1, 
+                 nthread = 2, 
+                 nrounds = 2, 
+                 objective = "survival:cox")
+
+#Feature Importance
+a <- xgb.importance(model = model) 
+xgb.plot.importance(a)
 
