@@ -47,15 +47,23 @@ ggsurvplot(fit, conf.int = TRUE, legend.labs=c("Sex=1", "Sex=2"), data=lung,
 ###########
 
 #Format data to DMatrix
-data <- as.matrix(lung)
-time <- as.matrix(lung$time)
-Dmat <- xgb.DMatrix(data = data[,4:10], label = time)
+lung <- lung
+
+label <- ifelse(lung$status == 2, lung$time, -lung$time) #Format so - values are censored
+Dmat <- as.matrix(lung[,4:10]) %>% xgb.DMatrix(label = label)
+
+#No tuning of hyperparameters
+model <- xgboost(data = Dmat, 
+                 max.depth = 2, 
+                 eta = 1, 
+                 nthread = 2, 
+                 nrounds = 2, 
+                 objective = "survival:cox")
 
 #Tune hyperparameters
 set.seed(123)
 xgb.fit1 <- xgb.cv(
   data = Dmat,
-  label = time,
   nrounds = 1000,
   nfold = 5,
   objective = "survival:cox", 
@@ -64,12 +72,7 @@ xgb.fit1 <- xgb.cv(
 
 
 
-model <- xgboost(data = Dmat, 
-                 max.depth = 2, 
-                 eta = 1, 
-                 nthread = 2, 
-                 nrounds = 2, 
-                 objective = "survival:cox")
+
 
 #Feature Importance
 a <- xgb.importance(model = model) 
