@@ -7,7 +7,7 @@ library(xgboost)
 library(caTools)
 library(dplyr)
 library(caret)
-library(shapr)
+library(SHAPforxgboost)
 
 ######################
 ### Classification
