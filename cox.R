@@ -9,7 +9,7 @@ library(xgboost)
 library(caTools)
 library(dplyr)
 library(caret)
-library(shapr)
+library(SHAPforxgboost)
 
 #Fit our cox model adding sex as a covariate
 res.cox <- coxph(Surv(time, status) ~ sex, data = lung)
@@ -57,7 +57,7 @@ model <- xgboost(data = Dmat,
                  max.depth = 2, 
                  eta = 1, 
                  nthread = 2, 
-                 nrounds = 2, 
+                 nrounds = 1000, 
                  objective = "survival:cox")
 
 #Tune hyperparameters
